@@ -8,4 +8,5 @@ module LibronShopServer {
 
     opens com.iesfranciscodelosrios.model to org.hibernate.orm.core, org.hibernate.commons.annotations;
     exports com.iesfranciscodelosrios;
+    opens com.iesfranciscodelosrios.model.nmrelation to org.hibernate.commons.annotations, org.hibernate.orm.core;
 }

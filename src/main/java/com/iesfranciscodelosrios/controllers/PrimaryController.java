@@ -1,9 +1,9 @@
 package com.iesfranciscodelosrios.controllers;
 
 import com.iesfranciscodelosrios.services.SocketService;
+import com.iesfranciscodelosrios.utils.PersistenceUnit;
 import com.iesfranciscodelosrios.utils.Tools;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -21,9 +21,11 @@ public class PrimaryController {
      * Este método se usa al iniciar el servidor, está pendiente de las conexiones de los clientes
      */
     public static void initializeServer() {
-        //iniciar la conexión a la base de datos
+        PersistenceUnit.init();
+        System.out.println(Tools.ANSI_GREEN + "Se ha abierto correctamente la conexión a la base de datos"+ Tools.ANSI_RESET);
         System.out.println("Iniciando el servidor");
         listeningToClients();
+        closeAllServer();
     }
 
     /**
@@ -86,6 +88,20 @@ public class PrimaryController {
                 System.out.println("Error al cerrar el cliente");
             }
         }
+    }
+
+    private static void closeAllServer(){
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                Thread.sleep(200);
+                PersistenceUnit.closeAllConnections();
+                System.out.println(Tools.ANSI_GREEN + "Cerrando la conexión a la base de datos"+ Tools.ANSI_RESET);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                e.printStackTrace();
+            }
+        }));
+
     }
 
 }

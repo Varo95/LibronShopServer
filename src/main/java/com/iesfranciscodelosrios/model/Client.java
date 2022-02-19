@@ -1,26 +1,27 @@
 package com.iesfranciscodelosrios.model;
 
+import com.iesfranciscodelosrios.model.nmrelation.UserBook;
+
 import javax.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
 @Entity
-@Table(name = "Client")
 @DiscriminatorValue("0")
 public class Client extends User implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
     @Column(name = "balance")
     private Long balance;
-    @OneToMany(mappedBy = "buyer")
-    private List<Book> pBooks;
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserBook> pBooks;
 
     public Client(){
         super();
     }
 
-    public Client(Long balance, List<Book> pBooks) {
+    public Client(Long balance, List<UserBook> pBooks) {
         this.balance = balance;
         this.pBooks = pBooks;
     }
@@ -33,11 +34,12 @@ public class Client extends User implements Serializable {
         this.balance = balance;
     }
 
-    public List<Book> getpBooks() {
+    public List<UserBook> getpBooks() {
         return pBooks;
     }
 
-    public void setpBooks(List<Book> pBooks) {
+    public void setpBooks(List<UserBook> pBooks) {
         this.pBooks = pBooks;
     }
+
 }

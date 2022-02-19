@@ -1,11 +1,24 @@
 package com.iesfranciscodelosrios.model;
 
+import com.iesfranciscodelosrios.model.nmrelation.UserBook;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.NaturalIdCache;
+
 import javax.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
+@Table(name = "BOOK")
+@NamedQueries(
+        @NamedQuery(name = "getStockedBooks", query = "SELECT b from Book b WHERE b.stock=true")
+)
+@NaturalIdCache
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Book implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -14,34 +27,35 @@ public class Book implements Serializable {
     @Column(name = "id")
     private Long id;
     @Column(name = "title")
+    @NaturalId
     private String title;
     //Imagen guardada en Base64
     @Column(name = "frontPage", columnDefinition = "LONGTEXT")
+    @NaturalId
     private String frontPage;
     @Column(name = "price")
+    @NaturalId
     private Double price;
     @Column(name = "releasedDate")
+    @NaturalId
     private LocalDateTime releasedDate;
-    @Column(name = "pDate")
-    private LocalDateTime pDate;
     @Column(name = "stock")
+    @NaturalId
     private boolean stock;
-    @ManyToOne
-    private Client buyer;
+    @OneToMany(mappedBy = "book",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserBook> buyers;
 
     public Book() {
         this.id = -1L;
     }
 
-    public Book(Long id, String title, String frontPage, Double price, LocalDateTime releasedDate, LocalDateTime pDate, boolean stock, Client buyer) {
+    public Book(Long id, String title, String frontPage, Double price, LocalDateTime releasedDate, boolean stock) {
         this.id = id;
         this.title = title;
         this.frontPage = frontPage;
         this.price = price;
         this.releasedDate = releasedDate;
-        this.pDate = pDate;
         this.stock = stock;
-        this.buyer = buyer;
     }
 
     public Long getId() {
@@ -84,14 +98,6 @@ public class Book implements Serializable {
         this.releasedDate = releasedDate;
     }
 
-    public LocalDateTime getpDate() {
-        return pDate;
-    }
-
-    public void setpDate(LocalDateTime pDate) {
-        this.pDate = pDate;
-    }
-
     public boolean isStock() {
         return stock;
     }
@@ -100,11 +106,4 @@ public class Book implements Serializable {
         this.stock = stock;
     }
 
-    public Client getBuyer() {
-        return buyer;
-    }
-
-    public void setBuyer(Client buyer) {
-        this.buyer = buyer;
-    }
 }
