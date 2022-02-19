@@ -1,5 +1,8 @@
 package com.iesfranciscodelosrios.utils;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 public class Tools {
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_BLACK = "\u001B[30m";
@@ -18,4 +21,20 @@ public class Tools {
     public static final String ANSI_PURPLE_BACKGROUND = "\u001B[45m";
     public static final String ANSI_CYAN_BACKGROUND = "\u001B[46m";
     public static final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
+
+    public static String encryptSHA256(String s) {
+        String result = null;
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA256");
+            md.update(s.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte aByte : md.digest()) {
+                sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
+            }
+            result = sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println(ANSI_RED+"No Provider supports a MessageDigestSpi implementation for the specified algorithm" + e.getMessage()+ANSI_RESET);
+        }
+        return result;
+    }
 }
