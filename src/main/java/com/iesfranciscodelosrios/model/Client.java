@@ -13,24 +13,24 @@ public class Client extends User implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
     @Column(name = "balance")
-    private Long balance;
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
+    private Double balance;
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private List<UserBook> pBooks;
 
     public Client(){
         super();
     }
 
-    public Client(Long balance, List<UserBook> pBooks) {
+    public Client(Double balance, List<UserBook> pBooks) {
         this.balance = balance;
         this.pBooks = pBooks;
     }
 
-    public Long getBalance() {
+    public Double getBalance() {
         return balance;
     }
 
-    public void setBalance(Long balance) {
+    public void setBalance(Double balance) {
         this.balance = balance;
     }
 
@@ -42,4 +42,21 @@ public class Client extends User implements Serializable {
         this.pBooks = pBooks;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Client client = (Client) o;
+
+        if (balance != null ? !balance.equals(client.balance) : client.balance != null) return false;
+        return pBooks != null ? pBooks.equals(client.pBooks) : client.pBooks == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = balance != null ? balance.hashCode() : 0;
+        result = 31 * result + (pBooks != null ? pBooks.hashCode() : 0);
+        return result;
+    }
 }

@@ -51,4 +51,8 @@ public class BookDAO {
         PersistenceUnit.closeEM();
         return result;
     }
+
+    public static synchronized boolean checkBook(Book b){
+        return getAllOnStockBooks().contains(b);
+    }
 }

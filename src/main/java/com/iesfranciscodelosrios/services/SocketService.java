@@ -17,6 +17,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SocketService {
     /**
@@ -39,7 +40,7 @@ public class SocketService {
                 } else if (o.containsKey(Operations.UserOptions.Login)) {
                     User clientLogin = (User) o.get(Operations.UserOptions.Login);
                     LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
-                    if (ClientDAO.checkUser(clientLogin)) {
+                    if (ClientDAO.checkUser(clientLogin, true)) {
                         String[] menu = null;
                         if (clientLogin instanceof Manager)
                             menu = new String[]{"Añadir libros", "Eliminar libros", "Cambiar stock", "Gestionar Clientes"};
@@ -62,7 +63,7 @@ public class SocketService {
                     }
                 } else if (o.containsKey(Operations.UserOptions.ViewOnStockBooks)) {
                     User clientLogin = (User) o.get(Operations.UserOptions.ViewOnStockBooks);
-                    if(ClientDAO.checkUser(clientLogin)){
+                    if(ClientDAO.checkUser(clientLogin, false)){
                         LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
                         mapToSend.put(Operations.ServerActions.SendBooksToPurchase,BookDAO.getAllOnStockBooks());
                         sendDataToClient(client, mapToSend);
@@ -75,11 +76,23 @@ public class SocketService {
                 }else if(o.containsKey(Operations.UserOptions.ViewPurchaseHistory)){
                     //enviar el historial de compra del cliente
                 }else if(o.containsKey(Operations.UserOptions.BuyItem)){
+                    Map<User, Book> userToBuyItem = (Map<User, Book>) o.get(Operations.UserOptions.BuyItem);
+                    userToBuyItem.forEach((user, book) -> {
+                        if(user instanceof Client c){
+                            double prePurchaseBalance = c.getBalance() - book.getPrice();
+                            if(prePurchaseBalance>0){
+                                ClientDAO.purchaseBook(c, book);
+                            }else{
+                                LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
+                                mapToSend.put(Operations.ServerActions.NotEnoughBalance, null);
+                            }
+                        }
+                    });
 
                 }else if(o.containsKey(Operations.UserOptions.AddBook)){
                     User manager = (User) o.get(Operations.UserOptions.AddBook);
                     LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
-                    if(ClientDAO.checkUser(manager)){
+                    if(ClientDAO.checkUser(manager, false)){
                         String[] items = new String[]{Tools.getDefaultCoverEncoded(),"Portada","Título", "Autor", "Fecha Salida", "Precio", "Stock" };
                         mapToSend.put(Operations.ServerActions.SendSubmenu, items);
                         sendDataToClient(client,mapToSend);

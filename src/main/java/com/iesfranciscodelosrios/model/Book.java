@@ -11,6 +11,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "BOOK")
@@ -45,7 +46,7 @@ public class Book implements Serializable {
     @Column(name = "stock")
     @NaturalId
     private boolean stock;
-    @OneToMany(mappedBy = "book",cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "book",cascade = CascadeType.ALL)
     private List<UserBook> buyers;
 
     public Book() {
@@ -116,6 +117,22 @@ public class Book implements Serializable {
 
     public void setStock(boolean stock) {
         this.stock = stock;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Book book = (Book) o;
+
+        if (stock != book.stock) return false;
+        if (!Objects.equals(id, book.id)) return false;
+        if (!Objects.equals(title, book.title)) return false;
+        if (!Objects.equals(author, book.author)) return false;
+        if (!Objects.equals(frontPage, book.frontPage)) return false;
+        if (!Objects.equals(price, book.price)) return false;
+        return Objects.equals(releasedDate, book.releasedDate);
     }
 
 }
