@@ -20,7 +20,6 @@ import java.util.List;
 
 public class SocketService {
     /**
-     *
      * @param client
      * @throws IOException
      * @throws ClassNotFoundException
@@ -35,7 +34,7 @@ public class SocketService {
                 if (o.containsKey(Operations.UserOptions.Register)) {
                     User clientRegister = (User) o.get(Operations.UserOptions.Register);
                     sendDataToClient(client, ClientDAO.registerUser(clientRegister));
-                //Si recibe la operación de login por parte del cliente
+                    //Si recibe la operación de login por parte del cliente
                 } else if (o.containsKey(Operations.UserOptions.Login)) {
                     User clientLogin = (User) o.get(Operations.UserOptions.Login);
                     LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
@@ -50,46 +49,46 @@ public class SocketService {
                             mapToSend.put(Operations.ServerActions.OperationOk, clientLogin);
                             sendDataToClient(client, mapToSend);
                         }
-                    }else if(clientLogin.getId()==null) {
-                        mapToSend.put(Operations.ServerActions.IncorrectUserType,clientLogin);
+                    } else if (clientLogin.getId() == null) {
+                        mapToSend.put(Operations.ServerActions.IncorrectUserType, clientLogin);
                         sendDataToClient(client, mapToSend);
-                    }else if(clientLogin.getId()==-1L){
-                        mapToSend.put(Operations.ServerActions.WrongPassword,clientLogin);
+                    } else if (clientLogin.getId() == -1L) {
+                        mapToSend.put(Operations.ServerActions.WrongPassword, clientLogin);
                         sendDataToClient(client, mapToSend);
-                    }else if(clientLogin.getId()==-2L){
-                        mapToSend.put(Operations.ServerActions.EmailDoesntExistOnDB,clientLogin);
+                    } else if (clientLogin.getId() == -2L) {
+                        mapToSend.put(Operations.ServerActions.EmailDoesntExistOnDB, clientLogin);
                         sendDataToClient(client, mapToSend);
                     }
                 } else if (o.containsKey(Operations.UserOptions.ViewOnStockBooks)) {
                     User clientLogin = (User) o.get(Operations.UserOptions.ViewOnStockBooks);
-                    if(ClientDAO.checkUser(clientLogin)){
+                    if (ClientDAO.checkUser(clientLogin)) {
                         List<Book> availableBooks = BookDAO.getAllOnStockBooks();
 
                     }
                 } else if (o.containsKey(Operations.UserOptions.ViewAccount)) {
                     //enviar además el balance del cliente para que pueda verlo desde su perfil
 
-                }else if(o.containsKey(Operations.UserOptions.ChargeAccount)){
+                } else if (o.containsKey(Operations.UserOptions.ChargeAccount)) {
 
-                }else if(o.containsKey(Operations.UserOptions.ViewPurchaseHistory)){
+                } else if (o.containsKey(Operations.UserOptions.ViewPurchaseHistory)) {
                     //enviar el historial de compra del cliente
-                }else if(o.containsKey(Operations.UserOptions.BuyItem)){
+                } else if (o.containsKey(Operations.UserOptions.BuyItem)) {
 
-                }else if(o.containsKey(Operations.UserOptions.AddBook)){
+                } else if (o.containsKey(Operations.UserOptions.AddBook)) {
                     User manager = (User) o.get(Operations.UserOptions.AddBook);
                     LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
-                    if(ClientDAO.checkUser(manager)){
-                        String[] items = new String[]{Tools.getDefaultCoverEncoded(),"Portada","Título", "Fecha Salida", "Precio", "Stock" };
+                    if (ClientDAO.checkUser(manager)) {
+                        String[] items = new String[]{Tools.getDefaultCoverEncoded(), "Portada", "Título", "Autor" , "Fecha Salida", "Precio", "Stock"};
                         mapToSend.put(Operations.ServerActions.SendSubmenu, items);
-                        sendDataToClient(client,mapToSend);
+                        sendDataToClient(client, mapToSend);
                     }
-                }else if(o.containsKey(Operations.UserOptions.ChangeStock)){
+                } else if (o.containsKey(Operations.UserOptions.ChangeStock)) {
                     //enviar menu
-                }else if(o.containsKey(Operations.UserOptions.DeleteBook)){
+                } else if (o.containsKey(Operations.UserOptions.DeleteBook)) {
                     //enviar menu
-                }else if(o.containsKey(Operations.UserOptions.SeeClients)){
+                } else if (o.containsKey(Operations.UserOptions.SeeClients)) {
                     //enviar menu
-                }else if(o.containsKey(Operations.UserOptions.AddBookAction)){
+                } else if (o.containsKey(Operations.UserOptions.AddBookAction)) {
                     Book b = (Book) o.get(Operations.UserOptions.AddBookAction);
                     BookDAO.registerBook(b);
                 }
