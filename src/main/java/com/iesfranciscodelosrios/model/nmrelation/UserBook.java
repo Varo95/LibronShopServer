@@ -70,4 +70,25 @@ public class UserBook implements Serializable {
         this.purchaseDate = purchaseDate;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UserBook userBook = (UserBook) o;
+
+        if (id != null ? !id.equals(userBook.id) : userBook.id != null) return false;
+        if (user != null ? !user.equals(userBook.user) : userBook.user != null) return false;
+        if (book != null ? !book.equals(userBook.book) : userBook.book != null) return false;
+        return purchaseDate != null ? purchaseDate.equals(userBook.purchaseDate) : userBook.purchaseDate == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (user != null ? user.hashCode() : 0);
+        result = 31 * result + (book != null ? book.hashCode() : 0);
+        result = 31 * result + (purchaseDate != null ? purchaseDate.hashCode() : 0);
+        return result;
+    }
 }
