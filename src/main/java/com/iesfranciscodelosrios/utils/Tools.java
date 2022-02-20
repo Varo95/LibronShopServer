@@ -1,7 +1,11 @@
 package com.iesfranciscodelosrios.utils;
 
+import com.iesfranciscodelosrios.Start;
+
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 public class Tools {
     public static final String ANSI_RESET = "\u001B[0m";
@@ -34,6 +38,17 @@ public class Tools {
             result = sb.toString();
         } catch (NoSuchAlgorithmException e) {
             System.out.println(ANSI_RED+"No Provider supports a MessageDigestSpi implementation for the specified algorithm" + e.getMessage()+ANSI_RESET);
+        }
+        return result;
+    }
+
+    public static String getDefaultCoverEncoded(){
+        String result;
+        try {
+            result = Base64.getEncoder().encodeToString(Start.class.getResourceAsStream("default_cover.png").readAllBytes());
+        }catch (IOException e){
+            System.out.println("Hubo un error al cargar la imagen por defecto");
+            result = "";
         }
         return result;
     }

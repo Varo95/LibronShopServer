@@ -79,16 +79,19 @@ public class SocketService {
                     User manager = (User) o.get(Operations.UserOptions.AddBook);
                     LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
                     if(ClientDAO.checkUser(manager)){
-                        String[] items = new String[]{"Portada","Título", "Fecha Salida", "Precio", "Stock" };
+                        String[] items = new String[]{Tools.getDefaultCoverEncoded(),"Portada","Título", "Fecha Salida", "Precio", "Stock" };
                         mapToSend.put(Operations.ServerActions.SendSubmenu, items);
                         sendDataToClient(client,mapToSend);
                     }
                 }else if(o.containsKey(Operations.UserOptions.ChangeStock)){
-
+                    //enviar menu
                 }else if(o.containsKey(Operations.UserOptions.DeleteBook)){
-
+                    //enviar menu
                 }else if(o.containsKey(Operations.UserOptions.SeeClients)){
-
+                    //enviar menu
+                }else if(o.containsKey(Operations.UserOptions.AddBookAction)){
+                    Book b = (Book) o.get(Operations.UserOptions.AddBookAction);
+                    BookDAO.registerBook(b);
                 }
             } catch (EOFException e) {
                 if (objectInputStream != null)
