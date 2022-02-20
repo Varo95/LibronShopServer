@@ -29,6 +29,9 @@ public class Book implements Serializable {
     @Column(name = "title")
     @NaturalId
     private String title;
+    @Column(name = "author")
+    @NaturalId
+    private String author;
     //Imagen guardada en Base64
     @Column(name = "frontPage", columnDefinition = "LONGTEXT")
     @NaturalId
@@ -49,9 +52,10 @@ public class Book implements Serializable {
         this.id = -1L;
     }
 
-    public Book(Long id, String title, String frontPage, Double price, LocalDateTime releasedDate, boolean stock) {
+    public Book(Long id,String author, String title, String frontPage, Double price, LocalDateTime releasedDate, boolean stock) {
         this.id = id;
         this.title = title;
+        this.author = author;
         this.frontPage = frontPage;
         this.price = price;
         this.releasedDate = releasedDate;
@@ -72,6 +76,14 @@ public class Book implements Serializable {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
     }
 
     public String getFrontPage() {

@@ -63,8 +63,9 @@ public class SocketService {
                 } else if (o.containsKey(Operations.UserOptions.ViewOnStockBooks)) {
                     User clientLogin = (User) o.get(Operations.UserOptions.ViewOnStockBooks);
                     if(ClientDAO.checkUser(clientLogin)){
-                        List<Book> availableBooks = BookDAO.getAllOnStockBooks();
-
+                        LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
+                        mapToSend.put(Operations.ServerActions.SendBooksToPurchase,BookDAO.getAllOnStockBooks());
+                        sendDataToClient(client, mapToSend);
                     }
                 } else if (o.containsKey(Operations.UserOptions.ViewAccount)) {
                     //enviar además el balance del cliente para que pueda verlo desde su perfil
@@ -79,7 +80,7 @@ public class SocketService {
                     User manager = (User) o.get(Operations.UserOptions.AddBook);
                     LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
                     if(ClientDAO.checkUser(manager)){
-                        String[] items = new String[]{Tools.getDefaultCoverEncoded(),"Portada","Título", "Fecha Salida", "Precio", "Stock" };
+                        String[] items = new String[]{Tools.getDefaultCoverEncoded(),"Portada","Título", "Autor", "Fecha Salida", "Precio", "Stock" };
                         mapToSend.put(Operations.ServerActions.SendSubmenu, items);
                         sendDataToClient(client,mapToSend);
                     }
