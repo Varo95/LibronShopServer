@@ -80,12 +80,16 @@ public class SocketService {
                     userToBuyItem.forEach((user, book) -> {
                         if(user instanceof Client c){
                             double prePurchaseBalance = c.getBalance() - book.getPrice();
-                            if(prePurchaseBalance>0){
+                            LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
+                            if(prePurchaseBalance>=0){
                                 ClientDAO.purchaseBook(c, book);
+                                LinkedHashMap<User, Book> linkedUserBook = new LinkedHashMap<>();
+                                linkedUserBook.put(c, book);
+                                mapToSend.put(Operations.ServerActions.OperationOk, linkedUserBook);
                             }else{
-                                LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
                                 mapToSend.put(Operations.ServerActions.NotEnoughBalance, null);
                             }
+                            sendDataToClient(client, mapToSend);
                         }
                     });
 
@@ -105,7 +109,7 @@ public class SocketService {
                     //enviar menu
                 }else if(o.containsKey(Operations.UserOptions.AddBookAction)){
                     Book b = (Book) o.get(Operations.UserOptions.AddBookAction);
-                    BookDAO.registerBook(b);
+                    sendDataToClient(client,BookDAO.registerBook(b));
                 }
             } catch (EOFException e) {
                 if (objectInputStream != null)

@@ -97,6 +97,7 @@ public class ClientDAO {
             em.getTransaction().begin();
             Client c = em.merge(client);
             Book b = em.merge(book);
+            client.setBalance(c.getBalance()-b.getPrice());
             c.setBalance(c.getBalance()-b.getPrice());
             em.persist(c);
             Query q = em.createNativeQuery("INSERT INTO USERBOOK (purchasedate, book_id, user_id) VALUES ( ?,?,? )");
