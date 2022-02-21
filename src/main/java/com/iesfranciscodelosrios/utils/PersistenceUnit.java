@@ -27,7 +27,7 @@ public class PersistenceUnit {
      *
      * @return entitymanager para la unidad de persistencia
      */
-    public static EntityManager createEM() {
+    public synchronized static EntityManager createEM() {
         if (emf == null) {
             try {
                 emf = Persistence.createEntityManagerFactory("ApplicationH2");
@@ -43,7 +43,7 @@ public class PersistenceUnit {
     /**
      * Cerramos la conexión con la base de datos
      */
-    private static void closeEntityManagerFactory() {
+    private synchronized static void closeEntityManagerFactory() {
         if (emf != null) {
             emf.close();
             emf = null;
@@ -53,7 +53,7 @@ public class PersistenceUnit {
     /**
      * Cerramos el EntityManager
      */
-    public static void closeEM() {
+    public synchronized static void closeEM() {
         if (manager != null) {
             manager.close();
             manager = null;
