@@ -15,9 +15,10 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "BOOK")
-@NamedQueries(
-        @NamedQuery(name = "getStockedBooks", query = "SELECT b from Book b WHERE b.stock=true")
-)
+@NamedQueries({
+        @NamedQuery(name = "getStockedBooks", query = "SELECT b from Book b WHERE b.stock=true AND b.releasedDate<=CURRENT_DATE"),
+        @NamedQuery(name = "getAllBookOrder", query = "SELECT b from Book b ORDER BY b.releasedDate DESC, b.stock DESC")
+})
 @NaturalIdCache
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Book implements Serializable {

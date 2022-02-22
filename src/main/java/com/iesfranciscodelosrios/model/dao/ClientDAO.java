@@ -4,17 +4,17 @@ import com.iesfranciscodelosrios.model.Book;
 import com.iesfranciscodelosrios.model.Client;
 import com.iesfranciscodelosrios.model.Manager;
 import com.iesfranciscodelosrios.model.User;
+import com.iesfranciscodelosrios.model.nmrelation.UserBook;
 import com.iesfranciscodelosrios.utils.Operations;
 import com.iesfranciscodelosrios.utils.PersistenceUnit;
 import com.iesfranciscodelosrios.utils.Tools;
 
-import javax.persistence.EntityManager;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
+import javax.persistence.*;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 //Este hará el CRUD de cliente y manager
 @MappedSuperclass
@@ -159,12 +159,26 @@ public class ClientDAO {
         if(client instanceof Client c) {
             Client u = em.merge(c);
             u.setBalance(u.getBalance()+amountToAdd);
-            c.setBalance(u.getBalance()+amountToAdd);
-            result = c.getBalance();
+            result = u.getBalance();
+            ((Client) client).setBalance(u.getBalance());
             em.persist(u);
         }
         em.getTransaction().commit();
         PersistenceUnit.closeEM();
+        notifyAll();
+        return result;
+    }
+
+    public synchronized List<UserBook> getClientHistorical(Client client){
+        List<UserBook> result = new ArrayList<>();
+        EntityManager em = PersistenceUnit.createEM();
+        em.getTransaction().begin();
+        TypedQuery<UserBook> query = em.createNamedQuery("getClientPurchasedBooks",UserBook.class);
+        query.setParameter("user", client);
+        result.addAll(query.getResultList());
+        em.getTransaction().commit();
+        PersistenceUnit.closeEM();
+        notifyAll();
         return result;
     }
 }

@@ -70,4 +70,33 @@ public class BookDAO {
     public synchronized boolean checkBook(Book b) {
         return BookDAO.getInstance().getAllOnStockBooks().contains(b);
     }
+
+    @Transient
+    public synchronized List<Book> getAllBooks(){
+        List<Book> result = new ArrayList<>();
+        EntityManager em = PersistenceUnit.createEM();
+        em.getTransaction().begin();
+        TypedQuery<Book> query = em.createNamedQuery("getAllBookOrder", Book.class);
+        result.addAll(query.getResultList());
+        em.getTransaction().commit();
+        PersistenceUnit.closeEM();
+        notifyAll();
+        return result;
+    }
+
+    @Transient
+    public synchronized boolean changeStock(Book book){
+        boolean result = false;
+        EntityManager em = PersistenceUnit.createEM();
+        em.getTransaction().begin();
+        Query q = em.createNativeQuery("UPDATE BOOK SET STOCK=? WHERE ID=?");
+        q.setParameter(1, book.isStock());
+        q.setParameter(2, book.getId());
+        q.executeUpdate();
+        result = true;
+        em.getTransaction().commit();
+        PersistenceUnit.closeEM();
+        notifyAll();
+        return result;
+    }
 }
