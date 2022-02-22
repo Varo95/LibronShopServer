@@ -6,6 +6,7 @@ import com.iesfranciscodelosrios.model.Manager;
 import com.iesfranciscodelosrios.model.User;
 import com.iesfranciscodelosrios.model.dao.BookDAO;
 import com.iesfranciscodelosrios.model.dao.ClientDAO;
+import com.iesfranciscodelosrios.model.nmrelation.UserBook;
 import com.iesfranciscodelosrios.utils.Operations;
 import com.iesfranciscodelosrios.utils.Tools;
 
@@ -15,8 +16,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 public class SocketService {
@@ -35,12 +37,12 @@ public class SocketService {
                 //Si recibe la operación de registrarse por parte del cliente
                 if (o.containsKey(Operations.UserOptions.Register)) {
                     User clientRegister = (User) o.get(Operations.UserOptions.Register);
-                    sendDataToClient(client, ClientDAO.registerUser(clientRegister));
+                    sendDataToClient(client, ClientDAO.getInstance().registerUser(clientRegister));
                 //Si recibe la operación de login por parte del cliente
                 } else if (o.containsKey(Operations.UserOptions.Login)) {
                     User clientLogin = (User) o.get(Operations.UserOptions.Login);
                     LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
-                    if (ClientDAO.checkUser(clientLogin, true)) {
+                    if (ClientDAO.getInstance().checkUser(clientLogin, true)) {
                         String[] menu = null;
                         if (clientLogin instanceof Manager)
                             menu = new String[]{"Añadir libros", "Eliminar libros", "Cambiar stock", "Gestionar Clientes"};
@@ -63,18 +65,52 @@ public class SocketService {
                     }
                 } else if (o.containsKey(Operations.UserOptions.ViewOnStockBooks)) {
                     User clientLogin = (User) o.get(Operations.UserOptions.ViewOnStockBooks);
-                    if(ClientDAO.checkUser(clientLogin, false)){
+                    if(ClientDAO.getInstance().checkUser(clientLogin, false)){
                         LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
-                        mapToSend.put(Operations.ServerActions.SendBooksToPurchase,BookDAO.getAllOnStockBooks());
+                        mapToSend.put(Operations.ServerActions.SendBooksToPurchase,BookDAO.getInstance().getAllOnStockBooks());
                         sendDataToClient(client, mapToSend);
                     }
                 } else if (o.containsKey(Operations.UserOptions.ViewAccount)) {
                     //enviar además el balance del cliente para que pueda verlo desde su perfil
-
+                    User clientLogin = (User) o.get(Operations.UserOptions.ViewAccount);
+                    Double account = ClientDAO.getInstance().getClientAccount((Client)clientLogin);
+                    Operations.ServerActions operation;
+                    if(account!=-2)
+                        operation = Operations.ServerActions.OperationOk;
+                    else
+                        operation = Operations.ServerActions.OperationOkButNoContent;
+                    LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
+                    mapToSend.put(operation, account);
+                    sendDataToClient(client, mapToSend);
                 }else if(o.containsKey(Operations.UserOptions.ChargeAccount)){
-
+                    User clientLogin = (User) o.get(Operations.UserOptions.ChargeAccount);
+                    LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
+                    if(ClientDAO.getInstance().checkUser(clientLogin, false) && clientLogin instanceof Client c) {
+                        Map<String, Client> mapClient = new HashMap<>();
+                        mapClient.put("Ingrese una cantidad para añadirla a su cuenta", c);
+                        mapToSend.put(Operations.ServerActions.SendProfile, mapClient);
+                        sendDataToClient(client, mapToSend);
+                    }
+                }else if(o.containsKey(Operations.UserOptions.ChargeAccountSend)){
+                    Map<User, Double> clientAndNewAmount = (Map<User, Double>) o.get(Operations.UserOptions.ChargeAccountSend);
+                    clientAndNewAmount.forEach((user, aDouble) -> {
+                        if(user instanceof Client c && ClientDAO.getInstance().checkUser(c, false)){
+                            LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
+                            mapToSend.put(Operations.ServerActions.OperationOk,ClientDAO.getInstance().increaseAccount(c, aDouble));
+                            mapToSend.put(Operations.ServerActions.NewBalance, user);
+                            sendDataToClient(client,mapToSend);
+                        }
+                    });
                 }else if(o.containsKey(Operations.UserOptions.ViewPurchaseHistory)){
-                    //enviar el historial de compra del cliente
+                    Client clientLogin = (Client) o.get(Operations.UserOptions.ViewPurchaseHistory);
+                    Map<LocalDateTime, Book> historicalPurchases = new LinkedHashMap<>();
+                    for (UserBook user_book:ClientDAO.getInstance().getClientHistorical(clientLogin)){
+                        user_book.getBook().setFrontPage("");
+                        historicalPurchases.put(user_book.getPurchaseDate(), user_book.getBook());
+                    }
+                    LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
+                    mapToSend.put(Operations.ServerActions.SendPurchaseHistory, historicalPurchases);
+                    sendDataToClient(client, mapToSend);
                 }else if(o.containsKey(Operations.UserOptions.BuyItem)){
                     Map<User, Book> userToBuyItem = (Map<User, Book>) o.get(Operations.UserOptions.BuyItem);
                     userToBuyItem.forEach((user, book) -> {
@@ -82,7 +118,7 @@ public class SocketService {
                             double prePurchaseBalance = c.getBalance() - book.getPrice();
                             LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
                             if(prePurchaseBalance>=0){
-                                ClientDAO.purchaseBook(c, book);
+                                ClientDAO.getInstance().purchaseBook(c, book);
                                 LinkedHashMap<User, Book> linkedUserBook = new LinkedHashMap<>();
                                 linkedUserBook.put(c, book);
                                 mapToSend.put(Operations.ServerActions.OperationOk, linkedUserBook);
@@ -92,24 +128,27 @@ public class SocketService {
                             sendDataToClient(client, mapToSend);
                         }
                     });
-
                 }else if(o.containsKey(Operations.UserOptions.AddBook)){
                     User manager = (User) o.get(Operations.UserOptions.AddBook);
                     LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
-                    if(ClientDAO.checkUser(manager, false)){
+                    if(manager instanceof Manager && ClientDAO.getInstance().checkUser(manager, false)){
                         String[] items = new String[]{Tools.getDefaultCoverEncoded(),"Portada","Título", "Autor", "Fecha Salida", "Precio", "Stock" };
-                        mapToSend.put(Operations.ServerActions.SendSubmenu, items);
+                        mapToSend.put(Operations.ServerActions.SendAddBook, items);
                         sendDataToClient(client,mapToSend);
                     }
                 }else if(o.containsKey(Operations.UserOptions.ChangeStock)){
-                    //enviar menu
-                }else if(o.containsKey(Operations.UserOptions.DeleteBook)){
-                    //enviar menu
-                }else if(o.containsKey(Operations.UserOptions.SeeClients)){
-                    //enviar menu
+                    User manager = (User) o.get(Operations.UserOptions.ChangeStock);
+                    LinkedHashMap<Operations.ServerActions, Object> mapToSend = new LinkedHashMap<>();
+                    if(manager instanceof Manager m && ClientDAO.getInstance().checkUser(m, false)){
+                        mapToSend.put(Operations.ServerActions.SendMenuBooks, BookDAO.getInstance().getAllBooks());
+                        sendDataToClient(client, mapToSend);
+                    }
+                }else if(o.containsKey(Operations.UserOptions.ChangeStockAction)){
+                    Book b = (Book) o.get(Operations.UserOptions.ChangeStockAction);
+                    BookDAO.getInstance().changeStock(b);
                 }else if(o.containsKey(Operations.UserOptions.AddBookAction)){
                     Book b = (Book) o.get(Operations.UserOptions.AddBookAction);
-                    sendDataToClient(client,BookDAO.registerBook(b));
+                    sendDataToClient(client,BookDAO.getInstance().registerBook(b));
                 }
             } catch (EOFException e) {
                 if (objectInputStream != null)
@@ -120,7 +159,7 @@ public class SocketService {
         }
     }
 
-    private static synchronized void sendDataToClient(Socket client, LinkedHashMap<Operations.ServerActions, Object> responseBody) {
+    private static void sendDataToClient(Socket client, LinkedHashMap<Operations.ServerActions, Object> responseBody) {
         if (client != null && !client.isClosed()) {
             ObjectOutputStream objectOutputStream;
             try {

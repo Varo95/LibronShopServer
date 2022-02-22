@@ -10,7 +10,6 @@
             <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect" />
             <property name="hibernate.enable_lazy_load_no_trans" value="true"/>
             <property name="hibernate.event.merge.entity_copy_observer" value="allow"/>
-            <property name="connection.pool_size" value="1"/>
             <property name="hibernate.hbm2ddl.auto" value="update" /><!-- Validate es mejor en producción -->
             <!--Mostrar sentencias SQL lanzadas por hibernate-->
             <!--<property name="hibernate.show_sql" value="true"/>-->

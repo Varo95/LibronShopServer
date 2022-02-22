@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "USERBOOK")
 @NamedQueries(
-        @NamedQuery(name = "getClientPurchasedBooks", query = "SELECT b from UserBook b WHERE b.user=:user")
+        @NamedQuery(name = "getClientPurchasedBooks", query = "SELECT b from UserBook b WHERE b.user=:user ORDER BY b.purchaseDate desc")
 )
 public class UserBook implements Serializable {
     @Serial
