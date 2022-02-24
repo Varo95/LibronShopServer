@@ -22,12 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class SocketService {
-    /**
-     *
-     * @param client
-     * @throws IOException
-     * @throws ClassNotFoundException
-     */
+
     public static void listenClientActions(Socket client) throws IOException, ClassNotFoundException {
         if (client != null && !client.isClosed()) {
             ObjectInputStream objectInputStream = null;
@@ -45,7 +40,7 @@ public class SocketService {
                     if (ClientDAO.getInstance().checkUser(clientLogin, true)) {
                         String[] menu = null;
                         if (clientLogin instanceof Manager)
-                            menu = new String[]{"Añadir libros", "Eliminar libros", "Cambiar stock", "Gestionar Clientes"};
+                            menu = new String[]{"Añadir libros", "Cambiar stock"};
                         else if (clientLogin instanceof Client)
                             menu = new String[]{"Ver libros disponibles", "Ver Historial pedidos", "Ver Saldo", "Ingresar Saldo"};
                         if (menu != null) {

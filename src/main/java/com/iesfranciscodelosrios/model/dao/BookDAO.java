@@ -86,7 +86,7 @@ public class BookDAO {
 
     @Transient
     public synchronized boolean changeStock(Book book){
-        boolean result = false;
+        boolean result;
         EntityManager em = PersistenceUnit.createEM();
         em.getTransaction().begin();
         Query q = em.createNativeQuery("UPDATE BOOK SET STOCK=? WHERE ID=?");

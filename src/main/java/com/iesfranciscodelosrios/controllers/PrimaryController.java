@@ -8,14 +8,11 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PrimaryController {
 
     private static ServerSocket ss;
     private static Thread listeningToClientsThread;
-    private static List<Thread> readClientsInputsThread = new ArrayList<>();
 
     /**
      * Este método se usa al iniciar el servidor, está pendiente de las conexiones de los clientes
@@ -75,7 +72,6 @@ public class PrimaryController {
                 }
             }
         });
-        readClientsInputsThread.add(t);
         t.start();
     }
 
@@ -101,7 +97,6 @@ public class PrimaryController {
                 e.printStackTrace();
             }
         }));
-
     }
 
 }

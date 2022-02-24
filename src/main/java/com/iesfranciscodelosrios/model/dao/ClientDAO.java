@@ -53,18 +53,15 @@ public class ClientDAO {
                         u.setId(null);
                         if (login)
                             System.out.println(Tools.ANSI_YELLOW + "Un usuario intentó iniciar sesión como " + (u.isManager() ? "Manager" : "Cliente") + ", pero su tipo en la BD es " + (((Byte) columns[4] != 0) ? "Manager" : "Cliente") + Tools.ANSI_RESET);
-                        result = false;
                     }
                 } else {
                     if (login)
                         System.out.println("El usuario " + u.getEmail() + " intentó iniciar sesión pero su contraseña era distinta a la guardada");
-                    result = false;
                 }
             } catch (NoResultException e) {
                 if (login)
                     System.out.println("El usuario " + u.getEmail() + " intentó iniciar sesión pero no está registrado");
                 u.setId(-2L);
-                result = false;
             } finally {
                 em.getTransaction().commit();
                 PersistenceUnit.closeEM();

@@ -1,13 +1,9 @@
 package com.iesfranciscodelosrios.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.persistence.*;
 
 public class PersistenceUnit {
 
-    private static final Logger logger = LoggerFactory.getLogger(PersistenceUnit.class);
     private static EntityManagerFactory emf = null;
     private static EntityManager manager = null;
 
@@ -18,7 +14,7 @@ public class PersistenceUnit {
         try {
             emf = Persistence.createEntityManagerFactory("ApplicationH2");
         } catch (PersistenceException e) {
-            logger.error("Sin nombre de proveedor de persistencia para EntityManager con H2");
+            System.out.println("Sin nombre de proveedor de persistencia para EntityManager con H2");
         }
     }
 
@@ -32,7 +28,7 @@ public class PersistenceUnit {
             try {
                 emf = Persistence.createEntityManagerFactory("ApplicationH2");
             } catch (PersistenceException e) {
-                logger.error("Sin nombre de proveedor de persistencia para EntityManager con H2");
+                System.out.println("Sin nombre de proveedor de persistencia para EntityManager con H2");
             }
         }
         if (manager == null)
